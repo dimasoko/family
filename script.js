@@ -12,56 +12,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalSlides = slides.length;
     let autoplayInterval;
 
-    // Функция показа слайда
+    
     function showSlide(index) {
-        // Убираем активный класс у всех слайдов
+        
         slides.forEach(slide => {
             slide.classList.remove('slider__slide--active');
         });
         
-        // Убираем активный класс у всех индикаторов
+        
         indicators.forEach(indicator => {
             indicator.classList.remove('slider__indicator--active');
         });
         
-        // Добавляем активный класс нужному слайду и индикатору
+        
         slides[index].classList.add('slider__slide--active');
         indicators[index].classList.add('slider__indicator--active');
     }
 
-    // Следующий слайд
+    
     function nextSlide() {
         currentSlide = (currentSlide + 1) % totalSlides;
         showSlide(currentSlide);
     }
 
-    // Предыдущий слайд
+    
     function prevSlide() {
         currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
         showSlide(currentSlide);
     }
 
-    // Переход к конкретному слайду
+    
     function goToSlide(index) {
         currentSlide = index;
         showSlide(currentSlide);
     }
 
-    // Автопрокрутка
+    
     function startAutoplay() {
-        autoplayInterval = setInterval(nextSlide, 5000); // Каждые 5 секунд
+        autoplayInterval = setInterval(nextSlide, 5000); 
     }
 
     function stopAutoplay() {
         clearInterval(autoplayInterval);
     }
 
-    // Обработчики событий
+    
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
             nextSlide();
             stopAutoplay();
-            startAutoplay(); // Перезапускаем автопрокрутку
+            startAutoplay(); 
         });
     }
 
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Клик по индикаторам
+    
     indicators.forEach((indicator, index) => {
         indicator.addEventListener('click', () => {
             goToSlide(index);
@@ -82,11 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Пауза при наведении на слайдер
+    
     slider.addEventListener('mouseenter', stopAutoplay);
     slider.addEventListener('mouseleave', startAutoplay);
 
-    // Свайп на мобильных устройствах
+    
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -101,20 +101,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleSwipe() {
         if (touchEndX < touchStartX - 50) {
-            // Свайп влево
+            
             nextSlide();
             stopAutoplay();
             startAutoplay();
         }
         if (touchEndX > touchStartX + 50) {
-            // Свайп вправо
+            
             prevSlide();
             stopAutoplay();
             startAutoplay();
         }
     }
 
-    // Навигация клавиатурой
+    
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') {
             prevSlide();
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Запуск автопрокрутки
+    
     startAutoplay();
 });
 
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cards = reviewsSlider.querySelectorAll('.review-card');
     let currentIndex = 0;
 
-    // Автоматическая прокрутка отзывов
+    
     setInterval(() => {
         currentIndex = (currentIndex + 1) % cards.length;
         const scrollAmount = cards[currentIndex].offsetLeft;
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
             left: scrollAmount,
             behavior: 'smooth'
         });
-    }, 6000); // Каждые 6 секунд
+    }, 6000); 
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!themeToggle) return;
 
-    // Проверяем сохраненную тему
+    
     const savedTheme = localStorage.getItem('theme') || 'dark';
     body.className = `theme-${savedTheme}`;
     updateIcon(savedTheme);
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (isValid) {
-                // Показываем сообщение об успехе
+                
                 const successMsg = form.querySelector('.form__message--success');
                 const errorMsg = form.querySelector('.form__message--error');
                 
@@ -205,13 +205,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     successMsg.style.display = 'block';
                     if (errorMsg) errorMsg.style.display = 'none';
                     
-                    // Скрываем через 5 секунд
+                    
                     setTimeout(() => {
                         successMsg.style.display = 'none';
                     }, 5000);
                 }
             } else {
-                // Показываем сообщение об ошибке
+                
                 const errorMsg = form.querySelector('.form__message--error');
                 const successMsg = form.querySelector('.form__message--success');
                 
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const ageOutput = document.querySelector('output[for="age-range"]');
 
     if (ageRange && ageNumber) {
-        // Синхронизация range -> number
+        
         ageRange.addEventListener('input', () => {
             ageNumber.value = ageRange.value;
             if (ageOutput) {
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Синхронизация number -> range
+        
         ageNumber.addEventListener('input', () => {
             ageRange.value = ageNumber.value;
             if (ageOutput) {
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!addMemberBtn || !familyMembers) return;
 
-    let memberCount = 2; // У нас уже есть 2 члена семьи
+    let memberCount = 2; 
 
     addMemberBtn.addEventListener('click', () => {
         memberCount++;
@@ -331,14 +331,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         familyMembers.appendChild(newMember);
         
-        // Добавляем обработчик удаления
+        
         const removeBtn = newMember.querySelector('.family-member__remove');
         removeBtn.addEventListener('click', () => {
             newMember.remove();
         });
     });
 
-    // Обработчики для существующих кнопок удаления
+    
     const removeButtons = document.querySelectorAll('.family-member__remove');
     removeButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
