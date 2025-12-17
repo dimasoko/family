@@ -249,7 +249,7 @@ a {
 .header__nav-list {
     display: flex;
     list-style: none;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-sm);
     flex-wrap: wrap;
     justify-content: center;
 }

@@ -1,3 +1,48 @@
+<?php 
+require_once 'db.php';
+
+$error = '';
+$success = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email']);
+    $firstName = trim($_POST['first-name']);
+    $lastName = trim($_POST['last-name']);
+    $password = $_POST['password'];
+    $passwordConfirm = $_POST['password-confirm'];
+    $phone = trim($_POST['phone'] ?? '');
+    
+    // Валидация
+    if (empty($email) || empty($firstName) || empty($lastName) || empty($password)) {
+        $error = 'Заполните все обязательные поля';
+    } elseif ($password !== $passwordConfirm) {
+        $error = 'Пароли не совпадают';
+    } elseif (strlen($password) < 6) {
+        $error = 'Пароль должен содержать минимум 6 символов';
+    } else {
+        // Проверка на существующий email
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        
+        if ($stmt->fetch()) {
+            $error = 'Пользователь с таким email уже зарегистрирован';
+        } else {
+            // Регистрация
+            $fullName = $firstName . ' ' . $lastName;
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            
+            $stmt = $pdo->prepare("INSERT INTO users (email, password, full_name, phone) VALUES (?, ?, ?, ?)");
+            
+            if ($stmt->execute([$email, $hashedPassword, $fullName, $phone])) {
+                $success = 'Регистрация успешно завершена! Добро пожаловать в "Моя семья – мой космос".';
+                // Можно перенаправить: header('Location: index.php#auth');
+            } else {
+                $error = 'Ошибка при регистрации. Попробуйте позже.';
+            }
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -10,7 +55,7 @@
     <header class="header">
         <div class="container">
             <div class="header__inner">
-                <a href="index.html" class="header__logo">
+                <a href="index.php" class="header__logo">
                     <img src="media/images/logo.png" alt="Моя семья – мой космос">
                     <span class="header__logo-text">Моя семья – мой космос</span>
                 </a>
@@ -18,22 +63,22 @@
                 <nav class="header__nav">
                     <ul class="header__nav-list">
                         <li class="header__nav-item">
-                            <a href="registration.html" class="header__nav-link header__nav-link--active">Регистрация</a>
+                            <a href="registration.php" class="header__nav-link header__nav-link--active">Регистрация</a>
                         </li>
                         <li class="header__nav-item">
-                            <a href="index.html#auth" class="header__nav-link">Авторизация</a>
+                            <a href="index.php#auth" class="header__nav-link">Авторизация</a>
                         </li>
                         <li class="header__nav-item">
-                            <a href="account.html" class="header__nav-link">Личный кабинет</a>
+                            <a href="account.php" class="header__nav-link">Личный кабинет</a>
                         </li>
                         <li class="header__nav-item">
-                            <a href="index.html#about" class="header__nav-link">О нас</a>
+                            <a href="index.php#about" class="header__nav-link">О нас</a>
                         </li>
                         <li class="header__nav-item">
-                            <a href="index.html#competitions" class="header__nav-link">Конкурсы</a>
+                            <a href="index.php#competitions" class="header__nav-link">Конкурсы</a>
                         </li>
                         <li class="header__nav-item">
-                            <a href="index.html#search" class="header__nav-link">Поиск</a>
+                            <a href="index.php#search" class="header__nav-link">Поиск</a>
                         </li>
                         <li class="header__nav-item">
                             <a href="#contacts" class="header__nav-link">Контакты</a>
@@ -48,13 +93,29 @@
         </div>
     </header>
 
+
     <main class="main">
         <section class="section section--registration">
             <div class="container">
                 <h1 class="section__title">Регистрация на сайте</h1>
                 <p class="section__subtitle">Заполните форму, чтобы принять участие в мероприятии</p>
                 
-                <form class="form form--registration" id="registration-form">
+                <?php if ($error): ?>
+                <div class="form__message form__message--error" style="display: block;">
+                    <span class="form__message-icon">⚠</span>
+                    <p class="form__message-text"><?php echo htmlspecialchars($error); ?></p>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($success): ?>
+                <div class="form__message form__message--success" style="display: block;">
+                    <span class="form__message-icon">✓</span>
+                    <p class="form__message-text"><?php echo htmlspecialchars($success); ?></p>
+                    <p style="margin-top: 10px;"><a href="index.php#auth" class="btn btn--primary">Войти в систему</a></p>
+                </div>
+                <?php endif; ?>
+                
+                <form class="form form--registration" id="registration-form" method="POST" action="registration.php">
                     <fieldset class="form__fieldset">
                         <legend class="form__legend">Личные данные</legend>
                         
@@ -67,6 +128,7 @@
                                    name="email" 
                                    class="form__input" 
                                    placeholder="example@mail.ru" 
+                                   value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
                                    required>
                             <span class="form__error" id="email-error">Введите корректный email</span>
                         </div>
@@ -81,6 +143,7 @@
                                        name="first-name" 
                                        class="form__input" 
                                        placeholder="Иван" 
+                                       value="<?php echo htmlspecialchars($_POST['first-name'] ?? ''); ?>"
                                        required>
                                 <span class="form__error" id="first-name-error">Поле обязательно для заполнения</span>
                             </div>
@@ -94,15 +157,28 @@
                                        name="last-name" 
                                        class="form__input" 
                                        placeholder="Иванов" 
+                                       value="<?php echo htmlspecialchars($_POST['last-name'] ?? ''); ?>"
                                        required>
                                 <span class="form__error" id="last-name-error">Поле обязательно для заполнения</span>
                             </div>
                         </div>
                         
+                        <div class="form__group">
+                            <label for="phone" class="form__label">
+                                Телефон
+                            </label>
+                            <input type="tel" 
+                                   id="phone" 
+                                   name="phone" 
+                                   class="form__input" 
+                                   placeholder="+7 (999) 123-45-67"
+                                   value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>">
+                        </div>
+                        
                         <div class="form__row">
                             <div class="form__group">
                                 <label for="age-number" class="form__label">
-                                    Возраст <span class="form__required">*</span>
+                                    Возраст
                                 </label>
                                 <input type="number" 
                                        id="age-number" 
@@ -110,8 +186,7 @@
                                        class="form__input" 
                                        min="1" 
                                        max="120" 
-                                       placeholder="25" 
-                                       required>
+                                       placeholder="25">
                                 <span class="form__hint">Укажите возраст числом</span>
                                 <span class="form__error" id="age-error">Введите корректный возраст</span>
                             </div>
@@ -133,7 +208,7 @@
                         
                         <div class="form__group">
                             <label class="form__label">
-                                Пол <span class="form__required">*</span>
+                                Пол
                             </label>
                             <div class="form__radio-group">
                                 <div class="form__radio-wrapper">
@@ -141,8 +216,7 @@
                                            id="gender-male" 
                                            name="gender" 
                                            value="male" 
-                                           class="form__radio" 
-                                           required>
+                                           class="form__radio">
                                     <label for="gender-male" class="form__label form__label--radio">Мужской</label>
                                 </div>
                                 <div class="form__radio-wrapper">
@@ -150,8 +224,7 @@
                                            id="gender-female" 
                                            name="gender" 
                                            value="female" 
-                                           class="form__radio" 
-                                           required>
+                                           class="form__radio">
                                     <label for="gender-female" class="form__label form__label--radio">Женский</label>
                                 </div>
                             </div>
@@ -191,15 +264,14 @@
                         
                         <div class="form__group">
                             <label for="photo" class="form__label">
-                                Семейная фотография <span class="form__required">*</span>
+                                Семейная фотография
                             </label>
                             <div class="form__file-wrapper">
                                 <input type="file" 
                                        id="photo" 
                                        name="photo" 
                                        class="form__file" 
-                                       accept="image/*" 
-                                       required>
+                                       accept="image/*">
                                 <label for="photo" class="form__file-label">
                                     <span class="form__file-icon">📁</span>
                                     <span class="form__file-text">Выберите файл</span>
@@ -210,6 +282,7 @@
                             <span class="form__error" id="photo-error">Загрузите семейную фотографию</span>
                         </div>
                     </fieldset>
+
 
                     <fieldset class="form__fieldset">
                         <legend class="form__legend">Члены семьи</legend>
@@ -264,6 +337,7 @@
                                     </div>
                                 </div>
                             </div>
+
 
                             <div class="family-member">
                                 <h3 class="family-member__title">Член семьи 2</h3>
@@ -321,6 +395,7 @@
                         </button>
                     </fieldset>
 
+
                     <div class="form__footer">
                         <div class="form__group form__group--checkbox">
                             <input type="checkbox" 
@@ -336,20 +411,11 @@
                         
                         <button type="submit" class="btn btn--primary btn--large">Зарегистрироваться</button>
                     </div>
-
-                    <div class="form__message form__message--success" id="success-message">
-                        <span class="form__message-icon">✓</span>
-                        <p class="form__message-text">Регистрация успешно завершена! Добро пожаловать в "Моя семья – мой космос".</p>
-                    </div>
-                    
-                    <div class="form__message form__message--error" id="error-message">
-                        <span class="form__message-icon">⚠</span>
-                        <p class="form__message-text">Пожалуйста, проверьте правильность заполнения всех обязательных полей.</p>
-                    </div>
                 </form>
             </div>
         </section>
     </main>
+
 
     <footer id="contacts" class="footer">
         <div class="container">
@@ -370,19 +436,19 @@
                     <h3 class="footer__title">Навигация</h3>
                     <ul class="footer__nav-list">
                         <li class="footer__nav-item">
-                            <a href="index.html" class="footer__link">Главная</a>
+                            <a href="index.php" class="footer__link">Главная</a>
                         </li>
                         <li class="footer__nav-item">
-                            <a href="index-light.html" class="footer__link">Главная-светлая</a>
+                            <a href="index-light.php" class="footer__link">Главная-светлая</a>
                         </li>
                         <li class="footer__nav-item">
-                            <a href="registration.html" class="footer__link">Регистрация</a>
+                            <a href="registration.php" class="footer__link">Регистрация</a>
                         </li>
                         <li class="footer__nav-item">
-                            <a href="competition.html" class="footer__link">Конкурс</a>
+                            <a href="competition.php" class="footer__link">Конкурс</a>
                         </li>
                         <li class="footer__nav-item">
-                            <a href="account.html" class="footer__link">Личный кабинет</a>
+                            <a href="account.php" class="footer__link">Личный кабинет</a>
                         </li>
                         <li class="footer__nav-item">
                             <a href="404.html" class="footer__link">Страница не найдена</a>

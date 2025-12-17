@@ -178,57 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('form');
-
-    forms.forEach(form => {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const inputs = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    isValid = false;
-                    input.style.borderColor = 'var(--color-error)';
-                } else {
-                    input.style.borderColor = 'var(--color-success)';
-                }
-            });
-
-            if (isValid) {
-                
-                const successMsg = form.querySelector('.form__message--success');
-                const errorMsg = form.querySelector('.form__message--error');
-                
-                if (successMsg) {
-                    successMsg.style.display = 'block';
-                    if (errorMsg) errorMsg.style.display = 'none';
-                    
-                    
-                    setTimeout(() => {
-                        successMsg.style.display = 'none';
-                    }, 5000);
-                }
-            } else {
-                
-                const errorMsg = form.querySelector('.form__message--error');
-                const successMsg = form.querySelector('.form__message--success');
-                
-                if (errorMsg) {
-                    errorMsg.style.display = 'block';
-                    if (successMsg) successMsg.style.display = 'none';
-                    
-                    setTimeout(() => {
-                        errorMsg.style.display = 'none';
-                    }, 5000);
-                }
-            }
-        });
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function() {
     const ageRange = document.getElementById('age-range');
     const ageNumber = document.getElementById('age-number');
     const ageOutput = document.querySelector('output[for="age-range"]');
