@@ -12,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $passwordConfirm = $_POST['password-confirm'];
     $phone = trim($_POST['phone'] ?? '');
     
-    // Валидация
     if (empty($email) || empty($firstName) || empty($lastName) || empty($password)) {
         $error = 'Заполните все обязательные поля';
     } elseif ($password !== $passwordConfirm) {
@@ -20,14 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strlen($password) < 6) {
         $error = 'Пароль должен содержать минимум 6 символов';
     } else {
-        // Проверка на существующий email
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
         
         if ($stmt->fetch()) {
             $error = 'Пользователь с таким email уже зарегистрирован';
         } else {
-            // Регистрация
             $fullName = $firstName . ' ' . $lastName;
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             
@@ -35,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if ($stmt->execute([$email, $hashedPassword, $fullName, $phone])) {
                 $success = 'Регистрация успешно завершена! Добро пожаловать в "Моя семья – мой космос".';
-                // Можно перенаправить: header('Location: index.php#auth');
             } else {
                 $error = 'Ошибка при регистрации. Попробуйте позже.';
             }

@@ -2,7 +2,6 @@
 session_start();
 require_once 'db.php';
 
-// Проверка авторизации
 if (!isset($_SESSION['user_id'])) {
     header('Location: index.php#auth');
     exit;
@@ -10,12 +9,10 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
-// Получаем данные пользователя
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch();
 
-// Обработка записи на конкурс
 $bookingSuccess = '';
 $bookingError = '';
 
@@ -35,10 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['competition'])) {
     }
 }
 
-// Получаем список конкурсов для формы
 $competitions = $pdo->query("SELECT * FROM competitions ORDER BY date_event ASC")->fetchAll();
 
-// Получаем записи пользователя
 $stmt = $pdo->prepare("
     SELECT r.*, c.title, c.date_event, c.time_start, c.time_end 
     FROM registrations r 
@@ -219,7 +214,6 @@ $userBookings = $stmt->fetchAll();
                     <h2 class="section__title">Мои отзывы</h2>
                     
                     <?php
-                    // Обработка создания отзыва
                     $reviewSuccess = '';
                     $reviewError = '';
                     
@@ -240,7 +234,6 @@ $userBookings = $stmt->fetchAll();
                         }
                     }
                     
-                    // Получаем отзывы пользователя
                     $stmt = $pdo->prepare("
                         SELECT r.*, c.title as competition_title 
                         FROM reviews r 

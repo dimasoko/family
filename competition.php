@@ -141,7 +141,6 @@ try {
                     <h2 class="competition__subtitle">Другие конкурсы</h2>
                     <div class="grid grid--3cols">
                         <?php
-                        // Получаем 3 случайных конкурса (кроме текущего)
                         $stmt = $pdo->prepare("SELECT * FROM competitions WHERE id != ? ORDER BY RAND() LIMIT 3");
                         $stmt->execute([$competition_id]);
                         

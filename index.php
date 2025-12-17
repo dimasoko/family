@@ -55,7 +55,6 @@
             <div class="slider">
                 <div class="slider__track">
                     <?php
-                    // Получаем первые 3 конкурса для слайдера
                     $stmt = $pdo->query("SELECT * FROM competitions ORDER BY date_event ASC LIMIT 3");
                     $slides = $stmt->fetchAll();
                     $first = true;
@@ -167,7 +166,6 @@ if (isset($_GET['error'])) {
             
             <div class="grid grid--3cols">
                 <?php
-                // Получаем все конкурсы
                 $stmt = $pdo->query("SELECT * FROM competitions ORDER BY date_event ASC");
                 
                 while ($comp = $stmt->fetch()) {
@@ -228,7 +226,6 @@ if (isset($_GET['error'])) {
             <div class="reviews-slider">
                 <div class="reviews-slider__track">
                     <?php
-                    // Получаем одобренные отзывы
                     $stmt = $pdo->query("SELECT r.*, u.full_name, c.title as competition_title, c.id as competition_id 
                                         FROM reviews r 
                                         JOIN users u ON r.user_id = u.id 

@@ -11,13 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
-    // Поиск пользователя в БД
     $stmt = $pdo->prepare("SELECT id, email, password, full_name FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
     
     if ($user && password_verify($password, $user['password'])) {
-        // Успешная авторизация
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_name'] = $user['full_name'];
@@ -25,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: account.php');
         exit;
     } else {
-        // Неверный логин или пароль
         header('Location: index.php#auth?error=invalid');
         exit;
     }
